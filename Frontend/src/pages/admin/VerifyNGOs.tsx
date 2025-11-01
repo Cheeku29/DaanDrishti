@@ -1,27 +1,45 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Building2, ShieldCheck, Eye, Search, FileText, CheckCircle2, Loader2 } from 'lucide-react';
-import { adminService } from '@/services/adminService';
-import { formatDate } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Building2,
+  ShieldCheck,
+  Eye,
+  Search,
+  FileText,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
+import { adminService } from "@/services/adminService";
+import { formatDate } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const VerifyNGOs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedNGO, setSelectedNGO] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const { data: pendingNGOs, isLoading, error } = useQuery({
-    queryKey: ['admin-pending-ngos'],
+  const {
+    data: pendingNGOs,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["admin-pending-ngos"],
     queryFn: () => adminService.getPendingNGOs(),
   });
 
@@ -29,33 +47,36 @@ const VerifyNGOs = () => {
     mutationFn: ({ id, verified }: { id: string; verified: boolean }) =>
       adminService.verifyNGO(id, verified),
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-pending-ngos'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-all-ngos'] });
-      queryClient.invalidateQueries({ queryKey: ['publicNGOs'] });
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-ngos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-ngos"] });
+      queryClient.invalidateQueries({ queryKey: ["publicNGOs"] });
       toast({
-        title: variables.verified ? 'NGO Verified' : 'NGO Unverified',
-        description: `NGO ${variables.verified ? 'verified' : 'unverified'} successfully`,
+        title: variables.verified ? "NGO Verified" : "NGO Unverified",
+        description: `NGO ${
+          variables.verified ? "verified" : "unverified"
+        } successfully`,
       });
       setDetailsOpen(false);
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
 
-  const filteredNGOs = pendingNGOs?.filter((ngo: any) => {
-    if (!searchQuery) return true;
-    return (
-      ngo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ngo.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ngo.state?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }) || [];
+  const filteredNGOs =
+    pendingNGOs?.filter((ngo: any) => {
+      if (!searchQuery) return true;
+      return (
+        ngo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ngo.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ngo.state?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }) || [];
 
   const handleViewDetails = (ngo: any) => {
     setSelectedNGO(ngo);
@@ -89,8 +110,12 @@ const VerifyNGOs = () => {
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">NGO Verification</h1>
-          <p className="text-muted-foreground mt-2">Review and approve pending NGO registrations</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            NGO Verification
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Review and approve pending NGO registrations
+          </p>
         </div>
 
         {/* Stats */}
@@ -135,7 +160,7 @@ const VerifyNGOs = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-accent">
-                {pendingNGOs && pendingNGOs.length > 0 ? 'Active' : 'Clear'}
+                {pendingNGOs && pendingNGOs.length > 0 ? "Active" : "Clear"}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Review queue</p>
             </CardContent>
@@ -158,12 +183,12 @@ const VerifyNGOs = () => {
           <div className="space-y-4">
             {filteredNGOs.map((ngo: any, index: number) => {
               const userEmail =
-                typeof ngo.userId === 'object' ? ngo.userId.email : '';
+                typeof ngo.userId === "object" ? ngo.userId.email : "";
               const userName =
-                typeof ngo.userId === 'object' ? ngo.userId.name : '';
+                typeof ngo.userId === "object" ? ngo.userId.name : "";
               const createdAt = ngo.createdAt
                 ? formatDate(ngo.createdAt)
-                : 'N/A';
+                : "N/A";
               return (
                 <Card
                   key={ngo._id}
@@ -207,7 +232,8 @@ const VerifyNGOs = () => {
                                 <FileText className="h-4 w-4" />
                                 <span>
                                   {ngo.documents.length} document
-                                  {ngo.documents.length !== 1 ? 's' : ''} submitted
+                                  {ngo.documents.length !== 1 ? "s" : ""}{" "}
+                                  submitted
                                 </span>
                               </div>
                             )}
@@ -238,7 +264,10 @@ const VerifyNGOs = () => {
                           size="sm"
                           className="w-full bg-success hover:bg-success/90 shadow-glow"
                           onClick={() =>
-                            verifyMutation.mutate({ id: ngo._id, verified: true })
+                            verifyMutation.mutate({
+                              id: ngo._id,
+                              verified: true,
+                            })
                           }
                           disabled={verifyMutation.isPending}
                         >
@@ -266,8 +295,8 @@ const VerifyNGOs = () => {
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">
                 {searchQuery
-                  ? 'No NGOs found matching your search'
-                  : 'No pending NGOs'}
+                  ? "No NGOs found matching your search"
+                  : "No pending NGOs"}
               </p>
               {!searchQuery && (
                 <p className="text-sm mt-2">
@@ -282,7 +311,7 @@ const VerifyNGOs = () => {
         <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{selectedNGO?.name || 'NGO Details'}</DialogTitle>
+              <DialogTitle>{selectedNGO?.name || "NGO Details"}</DialogTitle>
               <DialogDescription>Complete NGO information</DialogDescription>
             </DialogHeader>
             {selectedNGO && (
@@ -317,7 +346,7 @@ const VerifyNGOs = () => {
                     </div>
                   )}
                 </div>
-                {typeof selectedNGO.userId === 'object' && (
+                {typeof selectedNGO.userId === "object" && (
                   <div>
                     <p className="text-sm font-medium">Contact</p>
                     <p className="text-muted-foreground">

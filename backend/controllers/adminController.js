@@ -1,7 +1,7 @@
-import User from '../models/User.js';
-import NGO from '../models/NGO.js';
-import Donation from '../models/Donation.js';
-import SocialEvent from '../models/SocialEvent.js';
+import User from "../models/User.js";
+import NGO from "../models/NGO.js";
+import Donation from "../models/Donation.js";
+import SocialEvent from "../models/SocialEvent.js";
 
 // GET /api/admin/dashboard
 export const getDashboard = async (req, res, next) => {
@@ -9,11 +9,13 @@ export const getDashboard = async (req, res, next) => {
     const totalNGOs = await NGO.countDocuments();
     const verifiedNGOs = await NGO.countDocuments({ verified: true });
     const pendingNGOs = await NGO.countDocuments({ verified: false });
-    const totalDonors = await User.countDocuments({ role: 'donor' });
-    const totalDonations = await Donation.countDocuments({ status: 'completed' });
+    const totalDonors = await User.countDocuments({ role: "donor" });
+    const totalDonations = await Donation.countDocuments({
+      status: "completed",
+    });
     const totalAmount = await Donation.aggregate([
-      { $match: { status: 'completed' } },
-      { $group: { _id: null, total: { $sum: '$amount' } } },
+      { $match: { status: "completed" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
     const totalSocialEvents = await SocialEvent.countDocuments();
 
@@ -40,7 +42,7 @@ export const getDashboard = async (req, res, next) => {
 export const getPendingNGOs = async (req, res, next) => {
   try {
     const ngos = await NGO.find({ verified: false })
-      .populate('userId', 'name email')
+      .populate("userId", "name email")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -61,7 +63,7 @@ export const verifyNGO = async (req, res, next) => {
     );
 
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO not found' });
+      return res.status(404).json({ success: false, message: "NGO not found" });
     }
 
     res.json({ success: true, data: ngo });
@@ -74,7 +76,7 @@ export const verifyNGO = async (req, res, next) => {
 export const getAllNGOs = async (req, res, next) => {
   try {
     const ngos = await NGO.find()
-      .populate('userId', 'name email')
+      .populate("userId", "name email")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -89,14 +91,14 @@ export const getAnalytics = async (req, res, next) => {
   try {
     const totalNGOs = await NGO.countDocuments();
     const totalSocialEvents = await SocialEvent.countDocuments();
-    const totalDonors = await User.countDocuments({ role: 'donor' });
+    const totalDonors = await User.countDocuments({ role: "donor" });
 
     const topNGOs = await Donation.aggregate([
-      { $match: { status: 'completed' } },
+      { $match: { status: "completed" } },
       {
         $group: {
-          _id: '$ngoId',
-          totalAmount: { $sum: '$amount' },
+          _id: "$ngoId",
+          totalAmount: { $sum: "$amount" },
           donationCount: { $sum: 1 },
         },
       },
@@ -137,8 +139,8 @@ export const getAnalytics = async (req, res, next) => {
 // GET /api/admin/donors
 export const getAllDonors = async (req, res, next) => {
   try {
-    const donors = await User.find({ role: 'donor' })
-      .select('-password')
+    const donors = await User.find({ role: "donor" })
+      .select("-password")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -147,4 +149,3 @@ export const getAllDonors = async (req, res, next) => {
     next(e);
   }
 };
-

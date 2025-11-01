@@ -1,8 +1,13 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const ngoSchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true,
+    },
     name: { type: String, required: true },
     registrationNumber: { type: String, required: true, unique: true },
     description: { type: String },
@@ -14,5 +19,4 @@ const ngoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model('NGO', ngoSchema);
-
+export default mongoose.model("NGO", ngoSchema);

@@ -1,24 +1,32 @@
-import NGO from '../models/NGO.js';
-import Donation from '../models/Donation.js';
-import Spending from '../models/Spending.js';
+import NGO from "../models/NGO.js";
+import Donation from "../models/Donation.js";
+import Spending from "../models/Spending.js";
 
 // GET /api/ngo/dashboard
 export const getDashboard = async (req, res, next) => {
   try {
     const ngo = await NGO.findOne({ userId: req.user.id });
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO profile not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "NGO profile not found" });
     }
 
-    const donations = await Donation.find({ ngoId: ngo._id, status: 'completed' });
+    const donations = await Donation.find({
+      ngoId: ngo._id,
+      status: "completed",
+    });
     const spending = await Spending.find({ ngoId: ngo._id });
 
     const totalReceived = donations.reduce((sum, d) => sum + d.amount, 0);
     const totalSpent = spending.reduce((sum, s) => sum + s.amount, 0);
     const available = totalReceived - totalSpent;
 
-    const recentDonations = await Donation.find({ ngoId: ngo._id, status: 'completed' })
-      .populate('donorId', 'name email')
+    const recentDonations = await Donation.find({
+      ngoId: ngo._id,
+      status: "completed",
+    })
+      .populate("donorId", "name email")
       .sort({ date: -1 })
       .limit(5)
       .lean();
@@ -47,11 +55,13 @@ export const getNGODonations = async (req, res, next) => {
   try {
     const ngo = await NGO.findOne({ userId: req.user.id });
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO profile not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "NGO profile not found" });
     }
 
     const donations = await Donation.find({ ngoId: ngo._id })
-      .populate('donorId', 'name email')
+      .populate("donorId", "name email")
       .sort({ date: -1 })
       .lean();
 
@@ -66,7 +76,9 @@ export const addSpending = async (req, res, next) => {
   try {
     const ngo = await NGO.findOne({ userId: req.user.id });
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO profile not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "NGO profile not found" });
     }
 
     const spending = await Spending.create({
@@ -85,10 +97,14 @@ export const getSpending = async (req, res, next) => {
   try {
     const ngo = await NGO.findOne({ userId: req.user.id });
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO profile not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "NGO profile not found" });
     }
 
-    const spending = await Spending.find({ ngoId: ngo._id }).sort({ date: -1 }).lean();
+    const spending = await Spending.find({ ngoId: ngo._id })
+      .sort({ date: -1 })
+      .lean();
 
     res.json({ success: true, data: spending });
   } catch (e) {
@@ -101,7 +117,9 @@ export const updateSpending = async (req, res, next) => {
   try {
     const ngo = await NGO.findOne({ userId: req.user.id });
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO profile not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "NGO profile not found" });
     }
 
     const spending = await Spending.findOneAndUpdate(
@@ -111,7 +129,9 @@ export const updateSpending = async (req, res, next) => {
     );
 
     if (!spending) {
-      return res.status(404).json({ success: false, message: 'Spending record not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Spending record not found" });
     }
 
     res.json({ success: true, data: spending });
@@ -123,14 +143,14 @@ export const updateSpending = async (req, res, next) => {
 // PUT /api/ngo/profile
 export const updateProfile = async (req, res, next) => {
   try {
-    const ngo = await NGO.findOneAndUpdate(
-      { userId: req.user.id },
-      req.body,
-      { new: true }
-    );
+    const ngo = await NGO.findOneAndUpdate({ userId: req.user.id }, req.body, {
+      new: true,
+    });
 
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO profile not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "NGO profile not found" });
     }
 
     res.json({ success: true, data: ngo });
@@ -144,7 +164,9 @@ export const getProfile = async (req, res, next) => {
   try {
     const ngo = await NGO.findOne({ userId: req.user.id });
     if (!ngo) {
-      return res.status(404).json({ success: false, message: 'NGO profile not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "NGO profile not found" });
     }
 
     res.json({ success: true, data: ngo });
@@ -152,4 +174,3 @@ export const getProfile = async (req, res, next) => {
     next(e);
   }
 };
-

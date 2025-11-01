@@ -1,25 +1,47 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Building2, Search, Eye, CheckCircle, Loader2, ShieldCheck } from 'lucide-react';
-import { adminService } from '@/services/adminService';
-import { formatCurrency } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Building2,
+  Search,
+  Eye,
+  CheckCircle,
+  Loader2,
+  ShieldCheck,
+} from "lucide-react";
+import { adminService } from "@/services/adminService";
+import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const AllNGOs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterVerified, setFilterVerified] = useState<'all' | 'verified' | 'pending'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterVerified, setFilterVerified] = useState<
+    "all" | "verified" | "pending"
+  >("all");
+  const [selectedNGO, setSelectedNGO] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const { data: ngos, isLoading, error } = useQuery({
-    queryKey: ['admin-all-ngos'],
+  const {
+    data: ngos,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["admin-all-ngos"],
     queryFn: () => adminService.getAllNGOs(),
   });
 
@@ -27,38 +49,41 @@ const AllNGOs = () => {
     mutationFn: ({ id, verified }: { id: string; verified: boolean }) =>
       adminService.verifyNGO(id, verified),
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-all-ngos'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-pending-ngos'] });
-      queryClient.invalidateQueries({ queryKey: ['publicNGOs'] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-ngos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-ngos"] });
+      queryClient.invalidateQueries({ queryKey: ["publicNGOs"] });
       toast({
-        title: variables.verified ? 'NGO Verified' : 'NGO Unverified',
-        description: `NGO ${variables.verified ? 'verified' : 'unverified'} successfully`,
+        title: variables.verified ? "NGO Verified" : "NGO Unverified",
+        description: `NGO ${
+          variables.verified ? "verified" : "unverified"
+        } successfully`,
       });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
 
   // Note: We need to calculate donors and raised amounts from donations
   // For now, we'll show basic info
-  const filteredNGOs = ngos?.filter((ngo: any) => {
-    if (searchQuery) {
-      const matchesSearch =
-        ngo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ngo.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ngo.state?.toLowerCase().includes(searchQuery.toLowerCase());
-      if (!matchesSearch) return false;
-    }
-    if (filterVerified === 'verified') return ngo.verified === true;
-    if (filterVerified === 'pending') return ngo.verified === false;
-    return true;
-  }) || [];
+  const filteredNGOs =
+    ngos?.filter((ngo: any) => {
+      if (searchQuery) {
+        const matchesSearch =
+          ngo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          ngo.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          ngo.state?.toLowerCase().includes(searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      if (filterVerified === "verified") return ngo.verified === true;
+      if (filterVerified === "pending") return ngo.verified === false;
+      return true;
+    }) || [];
 
   const verifiedCount = ngos?.filter((n: any) => n.verified).length || 0;
   const pendingCount = ngos?.filter((n: any) => !n.verified).length || 0;
@@ -91,7 +116,9 @@ const AllNGOs = () => {
       <div className="space-y-8 animate-fade-in">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">All NGOs</h1>
-          <p className="text-muted-foreground mt-2">Manage all registered organizations</p>
+          <p className="text-muted-foreground mt-2">
+            Manage all registered organizations
+          </p>
         </div>
 
         {/* Stats */}
@@ -135,7 +162,9 @@ const AllNGOs = () => {
                 <div className="text-4xl font-bold text-accent mb-1">
                   {filteredNGOs.length}
                 </div>
-                <p className="text-sm text-muted-foreground">Filtered Results</p>
+                <p className="text-sm text-muted-foreground">
+                  Filtered Results
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -153,20 +182,20 @@ const AllNGOs = () => {
             />
           </div>
           <Button
-            variant={filterVerified === 'all' ? 'default' : 'outline'}
-            onClick={() => setFilterVerified('all')}
+            variant={filterVerified === "all" ? "default" : "outline"}
+            onClick={() => setFilterVerified("all")}
           >
             All
           </Button>
           <Button
-            variant={filterVerified === 'verified' ? 'default' : 'outline'}
-            onClick={() => setFilterVerified('verified')}
+            variant={filterVerified === "verified" ? "default" : "outline"}
+            onClick={() => setFilterVerified("verified")}
           >
             Verified
           </Button>
           <Button
-            variant={filterVerified === 'pending' ? 'default' : 'outline'}
-            onClick={() => setFilterVerified('pending')}
+            variant={filterVerified === "pending" ? "default" : "outline"}
+            onClick={() => setFilterVerified("pending")}
           >
             Pending
           </Button>
@@ -203,14 +232,14 @@ const AllNGOs = () => {
                             <Badge variant="secondary">{ngo.state}</Badge>
                           )}
                           <Badge
-                            variant={ngo.verified ? 'default' : 'outline'}
+                            variant={ngo.verified ? "default" : "outline"}
                             className={
                               ngo.verified
-                                ? 'bg-success/20 text-success border-success/30'
-                                : 'border-warning text-warning'
+                                ? "bg-success/20 text-success border-success/30"
+                                : "border-warning text-warning"
                             }
                           >
-                            {ngo.verified ? 'Verified' : 'Pending'}
+                            {ngo.verified ? "Verified" : "Pending"}
                           </Badge>
                         </div>
                         {ngo.description && (
@@ -227,18 +256,81 @@ const AllNGOs = () => {
                           Registration
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {ngo.registrationNumber || 'N/A'}
+                          {ngo.registrationNumber || "N/A"}
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => navigate(`/admin/ngos/${ngo._id}`)}
+                          onClick={() => {
+                            setSelectedNGO(ngo);
+                            setDetailsOpen(true);
+                          }}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           View
                         </Button>
+                        {/* Details Dialog */}
+                        <Dialog
+                          open={detailsOpen}
+                          onOpenChange={setDetailsOpen}
+                        >
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>
+                                {selectedNGO?.name || "NGO Details"}
+                              </DialogTitle>
+                              <DialogDescription>
+                                Complete NGO information
+                              </DialogDescription>
+                            </DialogHeader>
+                            {selectedNGO && (
+                              <div className="space-y-4">
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    Registration Number
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    {selectedNGO.registrationNumber}
+                                  </p>
+                                </div>
+                                {selectedNGO.description && (
+                                  <div>
+                                    <p className="text-sm font-medium">
+                                      Description
+                                    </p>
+                                    <p className="text-muted-foreground">
+                                      {selectedNGO.description}
+                                    </p>
+                                  </div>
+                                )}
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    Category
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    {selectedNGO.category}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">State</p>
+                                  <p className="text-muted-foreground">
+                                    {selectedNGO.state}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    Verified
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    {selectedNGO.verified ? "Yes" : "No"}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
                         {!ngo.verified && (
                           <Button
                             size="sm"
@@ -275,9 +367,9 @@ const AllNGOs = () => {
           <Card className="border-border/50 shadow-lg">
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">
-                {searchQuery || filterVerified !== 'all'
-                  ? 'No NGOs found matching your criteria'
-                  : 'No NGOs registered yet'}
+                {searchQuery || filterVerified !== "all"
+                  ? "No NGOs found matching your criteria"
+                  : "No NGOs registered yet"}
               </p>
             </CardContent>
           </Card>

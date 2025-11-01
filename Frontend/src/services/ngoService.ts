@@ -2,8 +2,19 @@
 
 export interface NGODashboard {
   ngo: NGODetails;
-  stats: { totalReceived: number; totalSpent: number; available: number; donationCount: number; spendingCount: number };
-  recentDonations: Array<{ _id: string; amount: number; date: string; donorId: { _id: string; name: string; email: string } }>;
+  stats: {
+    totalReceived: number;
+    totalSpent: number;
+    available: number;
+    donationCount: number;
+    spendingCount: number;
+  };
+  recentDonations: Array<{
+    _id: string;
+    amount: number;
+    date: string;
+    donorId: { _id: string; name: string; email: string };
+  }>;
 }
 
 export interface NGODetails {
@@ -46,7 +57,9 @@ export const ngoService = {
     throw new Error(response.message || "Failed to fetch spending");
   },
 
-  async addSpending(data: Omit<Spending, "_id" | "ngoId" | "date">): Promise<Spending> {
+  async addSpending(
+    data: Omit<Spending, "_id" | "ngoId" | "date">
+  ): Promise<Spending> {
     const response = await apiClient.post<Spending>("/ngo/spending", data);
     if (response.success && response.data) return response.data;
     throw new Error(response.message || "Failed to add spending");
