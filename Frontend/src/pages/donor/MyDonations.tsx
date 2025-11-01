@@ -1,28 +1,131 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, Download, Eye, Loader2 } from 'lucide-react';
-import { donorService, Donation } from '@/services/donorService';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import jsPDF from "jspdf";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Download, Eye, Loader2 } from "lucide-react";
+import { donorService, Donation } from "@/services/donorService";
+import { formatCurrency, formatDate } from "@/lib/utils";
+
+const generatePDF = (donations: Donation[]) => {
+  const pdf = new jsPDF();
+  const pageWidth = pdf.internal.pageSize.getWidth();
+
+  // Add title
+  pdf.setFontSize(20);
+  pdf.text("Donation Report", pageWidth / 2, 20, { align: "center" });
+
+  // Add date
+  pdf.setFontSize(10);
+  pdf.text(`Generated on: ${formatDate(new Date())}`, pageWidth / 2, 30, {
+    align: "center",
+  });
+
+  // Table headers
+  const headers = [
+    "Date",
+    "NGO Name",
+    "Category",
+    "Amount",
+    "Status",
+    "Order ID",
+  ];
+  pdf.setFontSize(12);
+  pdf.setTextColor(100);
+
+  // Calculate column widths (total = 190)
+  const colWidths = [35, 45, 30, 30, 25, 25];
+  let yPos = 40;
+  let xPos = 10;
+
+  // Draw headers
+  headers.forEach((header, i) => {
+    pdf.text(header, xPos, yPos);
+    xPos += colWidths[i];
+  });
+
+  // Add a line under headers
+  pdf.setDrawColor(200);
+  pdf.line(10, yPos + 2, 200, yPos + 2);
+
+  // Table rows
+  pdf.setFontSize(10);
+  pdf.setTextColor(0);
+  yPos += 10;
+
+  donations.forEach((donation, index) => {
+    // Add new page if needed
+    if (yPos > 280) {
+      pdf.addPage();
+      yPos = 20;
+    }
+
+    const ngoName =
+      typeof donation.ngoId === "object" ? donation.ngoId.name : "Unknown NGO";
+    const category =
+      typeof donation.ngoId === "object"
+        ? donation.ngoId.category || "Other"
+        : "Other";
+
+    xPos = 10;
+    const rowData = [
+      formatDate(donation.date),
+      ngoName,
+      category,
+      donation.amount.toString(),
+      donation.status,
+      donation.orderId?.slice(-8) || "N/A",
+    ];
+
+    rowData.forEach((text, i) => {
+      // Handle long text
+      if (text.length > 20) {
+        text = text.substring(0, 17) + "...";
+      }
+      pdf.text(text, xPos, yPos);
+      xPos += colWidths[i];
+    });
+
+    yPos += 7;
+
+    // Add a light line between rows
+    if (index < donations.length - 1) {
+      pdf.setDrawColor(240);
+      pdf.line(10, yPos - 3, 200, yPos - 3);
+    }
+  });
+
+  // Add total at the bottom
+  const total = donations.reduce((sum, donation) => sum + donation.amount, 0);
+  pdf.setFontSize(12);
+  pdf.setFont(undefined, "bold");
+
+  // Save the PDF
+  pdf.save(`donation_report_${formatDate(new Date())}.pdf`);
+};
 
 const MyDonations = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: donations, isLoading, error } = useQuery({
-    queryKey: ['donor-donations'],
+  const {
+    data: donations,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["donor-donations"],
     queryFn: () => donorService.getMyDonations(),
   });
 
-  const filteredDonations = donations?.filter((donation) => {
-    if (!searchQuery) return true;
-    const ngoName =
-      typeof donation.ngoId === 'object' ? donation.ngoId.name : '';
-    return ngoName.toLowerCase().includes(searchQuery.toLowerCase());
-  }) || [];
+  const filteredDonations =
+    donations?.filter((donation) => {
+      if (!searchQuery) return true;
+      const ngoName =
+        typeof donation.ngoId === "object" ? donation.ngoId.name : "";
+      return ngoName.toLowerCase().includes(searchQuery.toLowerCase());
+    }) || [];
 
   if (isLoading) {
     return (
@@ -55,7 +158,9 @@ const MyDonations = () => {
       <div className="space-y-8 animate-fade-in">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Donations</h1>
-          <p className="text-muted-foreground mt-2">Track all your charitable contributions</p>
+          <p className="text-muted-foreground mt-2">
+            Track all your charitable contributions
+          </p>
         </div>
 
         {/* Search and Filter */}
@@ -69,9 +174,13 @@ const MyDonations = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => generatePDF(filteredDonations)}
+            disabled={filteredDonations.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
-            Export Report
+            Export PDF Report
           </Button>
         </div>
 
@@ -85,13 +194,13 @@ const MyDonations = () => {
               <div className="space-y-3">
                 {filteredDonations.map((donation, index) => {
                   const ngoName =
-                    typeof donation.ngoId === 'object'
+                    typeof donation.ngoId === "object"
                       ? donation.ngoId.name
-                      : 'Unknown NGO';
+                      : "Unknown NGO";
                   const category =
-                    typeof donation.ngoId === 'object'
-                      ? donation.ngoId.category || 'Other'
-                      : 'Other';
+                    typeof donation.ngoId === "object"
+                      ? donation.ngoId.category || "Other"
+                      : "Other";
                   return (
                     <div
                       key={donation._id}
@@ -135,16 +244,16 @@ const MyDonations = () => {
                         <div className="flex items-center gap-2">
                           <Badge
                             variant={
-                              donation.status === 'completed'
-                                ? 'default'
-                                : donation.status === 'pending'
-                                ? 'secondary'
-                                : 'destructive'
+                              donation.status === "completed"
+                                ? "default"
+                                : donation.status === "pending"
+                                ? "secondary"
+                                : "destructive"
                             }
                             className={
-                              donation.status === 'completed'
-                                ? 'bg-success/20 text-success border-success/30'
-                                : ''
+                              donation.status === "completed"
+                                ? "bg-success/20 text-success border-success/30"
+                                : ""
                             }
                           >
                             {donation.status}
@@ -159,8 +268,8 @@ const MyDonations = () => {
               <div className="text-center py-12 text-muted-foreground">
                 <p>
                   {searchQuery
-                    ? 'No donations found matching your search'
-                    : 'No donations yet'}
+                    ? "No donations found matching your search"
+                    : "No donations yet"}
                 </p>
                 {!searchQuery && (
                   <p className="text-sm mt-2">
