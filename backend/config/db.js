@@ -4,7 +4,8 @@ import User from "../models/User.js";
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" }); // or '../.env' if .env is in root
 
-// const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/fund-trust';
+// const MONGODB_URI =
+//   process.env.MONGODB_URI || "mongodb://localhost:27017/fund-trust";
 const MONGODB_URI = process.env.MONGODB_URI;
 
 export const connectDB = async () => {
