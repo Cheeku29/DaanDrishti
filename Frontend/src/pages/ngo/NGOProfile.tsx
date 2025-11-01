@@ -1,46 +1,56 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Building2, Save, Loader2 } from 'lucide-react';
-import { ngoService } from '@/services/ngoService';
-import { formatCurrency } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, Building2, Save, Loader2 } from "lucide-react";
+import { ngoService } from "@/services/ngoService";
+import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const NGOProfile = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['ngo-profile'],
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["ngo-profile"],
     queryFn: () => ngoService.getProfile(),
   });
 
   const { data: dashboardData } = useQuery({
-    queryKey: ['ngo-dashboard'],
+    queryKey: ["ngo-dashboard"],
     queryFn: () => ngoService.getDashboard(),
   });
 
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: '',
-    state: '',
+    name: "",
+    description: "",
+    category: "",
+    state: "",
   });
 
   // Initialize form data when profile loads
   useEffect(() => {
     if (profile) {
       setFormData({
-        name: profile.name || '',
-        description: profile.description || '',
-        category: profile.category || '',
-        state: profile.state || '',
+        name: profile.name || "",
+        description: profile.description || "",
+        category: profile.category || "",
+        state: profile.state || "",
       });
     }
   }, [profile]);
@@ -49,18 +59,18 @@ const NGOProfile = () => {
     mutationFn: (data: Partial<typeof formData>) =>
       ngoService.updateProfile(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ngo-profile'] });
-      queryClient.invalidateQueries({ queryKey: ['ngo-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ["ngo-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["ngo-dashboard"] });
       toast({
-        title: 'Profile updated',
-        description: 'Your profile has been updated successfully',
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -104,12 +114,22 @@ const NGOProfile = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">NGO Profile</h1>
-            <p className="text-muted-foreground mt-2">Manage your organization's information</p>
+            <p className="text-muted-foreground mt-2">
+              Manage your organization's information
+            </p>
           </div>
-          <Badge className="bg-success/20 text-success border-success/30 px-4 py-2">
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Verified Organization
-          </Badge>
+          <div className="flex items-center gap-2">
+            {profile?.verified ? (
+              <>
+                <CheckCircle className="h-5 w-5 text-success" />
+                <span className="text-sm font-medium text-success">
+                  Verified NGO
+                </span>
+              </>
+            ) : (
+              <Badge variant="secondary">Pending Verification</Badge>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -149,9 +169,11 @@ const NGOProfile = () => {
                 </p>
               </div>
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Registration No.</p>
+                <p className="text-sm text-muted-foreground">
+                  Registration No.
+                </p>
                 <p className="text-lg font-bold text-success">
-                  {profile?.registrationNumber || 'N/A'}
+                  {profile?.registrationNumber || "N/A"}
                 </p>
               </div>
             </CardContent>
@@ -162,7 +184,9 @@ const NGOProfile = () => {
         <Card className="border-border/50 shadow-lg">
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Update your organization's details</CardDescription>
+            <CardDescription>
+              Update your organization's details
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -221,7 +245,7 @@ const NGOProfile = () => {
                 <Label htmlFor="registrationNumber">Registration Number</Label>
                 <Input
                   id="registrationNumber"
-                  value={profile?.registrationNumber || ''}
+                  value={profile?.registrationNumber || ""}
                   disabled
                   className="bg-muted"
                 />
