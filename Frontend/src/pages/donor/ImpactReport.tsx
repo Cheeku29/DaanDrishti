@@ -1,38 +1,55 @@
-import { useQuery } from '@tanstack/react-query';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { TrendingUp, Users, Heart, Target, Loader2 } from 'lucide-react';
-import { donorService, Donation } from '@/services/donorService';
-import { formatCurrency } from '@/lib/utils';
+import { useQuery } from "@tanstack/react-query";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+import { TrendingUp, Users, Heart, Target, Loader2 } from "lucide-react";
+import { donorService, Donation } from "@/services/donorService";
+import { formatCurrency } from "@/lib/utils";
 
 const ImpactReport = () => {
-  const { data: donations, isLoading, error } = useQuery({
-    queryKey: ['donor-donations'],
+  const {
+    data: donations,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["donor-donations"],
     queryFn: () => donorService.getMyDonations(),
   });
 
   const { data: impactReports } = useQuery({
-    queryKey: ['donor-impact-reports'],
+    queryKey: ["donor-impact-reports"],
     queryFn: () => donorService.getImpactReports(),
   });
 
   // Calculate stats from real donations
   const completedDonations =
-    donations?.filter((d) => d.status === 'completed') || [];
-  const totalDonated = completedDonations.reduce(
-    (sum, d) => sum + d.amount,
-    0
-  );
+    donations?.filter((d) => d.status === "completed") || [];
+  const totalDonated = completedDonations.reduce((sum, d) => sum + d.amount, 0);
 
   // Calculate category distribution
   const categoryMap: Record<string, number> = {};
   completedDonations.forEach((donation) => {
-    if (typeof donation.ngoId === 'object' && donation.ngoId.category) {
-      const category = donation.ngoId.category || 'Other';
+    if (typeof donation.ngoId === "object" && donation.ngoId.category) {
+      const category = donation.ngoId.category || "Other";
       categoryMap[category] = (categoryMap[category] || 0) + donation.amount;
     } else {
-      categoryMap['Other'] = (categoryMap['Other'] || 0) + donation.amount;
+      categoryMap["Other"] = (categoryMap["Other"] || 0) + donation.amount;
     }
   });
 
@@ -41,15 +58,15 @@ const ImpactReport = () => {
       name,
       value,
       color:
-        name === 'Education'
-          ? 'hsl(168, 76%, 52%)'
-          : name === 'Healthcare'
-          ? 'hsl(340, 82%, 62%)'
-          : name === 'Environment'
-          ? 'hsl(142, 76%, 42%)'
-          : name === 'Water'
-          ? 'hsl(38, 92%, 50%)'
-          : 'hsl(210, 20%, 70%)',
+        name === "Education"
+          ? "hsl(168, 76%, 52%)"
+          : name === "Healthcare"
+          ? "hsl(340, 82%, 62%)"
+          : name === "Environment"
+          ? "hsl(142, 76%, 42%)"
+          : name === "Water"
+          ? "hsl(38, 92%, 50%)"
+          : "hsl(210, 20%, 70%)",
     }))
     .sort((a, b) => b.value - a.value);
 
@@ -57,8 +74,9 @@ const ImpactReport = () => {
   const monthlyDataMap: Record<string, number> = {};
   completedDonations.forEach((donation) => {
     const date = new Date(donation.date);
-    const monthKey = date.toLocaleString('default', { month: 'short' });
-    monthlyDataMap[monthKey] = (monthlyDataMap[monthKey] || 0) + donation.amount;
+    const monthKey = date.toLocaleString("default", { month: "short" });
+    monthlyDataMap[monthKey] =
+      (monthlyDataMap[monthKey] || 0) + donation.amount;
   });
 
   const monthlyData = Object.entries(monthlyDataMap)
@@ -68,35 +86,35 @@ const ImpactReport = () => {
   // Calculate impact metrics from reports
   const impactMetrics = [
     {
-      label: 'Total Donated',
+      label: "Total Donated",
       value: formatCurrency(totalDonated),
       icon: Heart,
-      color: 'text-primary',
+      color: "text-primary",
     },
     {
-      label: 'NGOs Supported',
+      label: "NGOs Supported",
       value: String(
         new Set(
           completedDonations.map((d) => {
-            const ngoId = typeof d.ngoId === 'object' ? d.ngoId._id : d.ngoId;
+            const ngoId = typeof d.ngoId === "object" ? d.ngoId._id : d.ngoId;
             return ngoId;
           })
         ).size
       ),
       icon: Users,
-      color: 'text-accent',
+      color: "text-accent",
     },
     {
-      label: 'Donations Made',
+      label: "Donations Made",
       value: String(completedDonations.length),
       icon: Target,
-      color: 'text-success',
+      color: "text-success",
     },
     {
-      label: 'Impact Reports',
+      label: "Impact Reports",
       value: String(impactReports?.length || 0),
       icon: TrendingUp,
-      color: 'text-warning',
+      color: "text-warning",
     },
   ];
 
@@ -128,24 +146,32 @@ const ImpactReport = () => {
       <div className="space-y-8 animate-fade-in">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Impact Report</h1>
-          <p className="text-muted-foreground mt-2">See the real-world impact of your donations</p>
+          <p className="text-muted-foreground mt-2">
+            See the real-world impact of your donations
+          </p>
         </div>
 
         {/* Impact Metrics */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {impactMetrics.map((metric, index) => (
-            <Card 
+            <Card
               key={metric.label}
               className="border-border/50 shadow-lg card-hover animate-slide-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{metric.label}</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {metric.label}
+                </CardTitle>
                 <metric.icon className={`h-5 w-5 ${metric.color}`} />
               </CardHeader>
               <CardContent>
-                <div className={`text-3xl font-bold ${metric.color}`}>{metric.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">Lives impacted</p>
+                <div className={`text-3xl font-bold ${metric.color}`}>
+                  {metric.value}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Lives impacted
+                </p>
               </CardContent>
             </Card>
           ))}
@@ -156,7 +182,9 @@ const ImpactReport = () => {
           <Card className="border-border/50 shadow-lg">
             <CardHeader>
               <CardTitle>Donation Distribution by Sector</CardTitle>
-              <CardDescription>Where your money is making a difference</CardDescription>
+              <CardDescription>
+                Where your money is making a difference
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -175,11 +203,11 @@ const ImpactReport = () => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
                       }}
                     />
                   </PieChart>
@@ -202,7 +230,7 @@ const ImpactReport = () => {
           </Card>
 
           {/* Monthly Trend */}
-          <Card className="border-border/50 shadow-lg">
+          {/* <Card className="border-border/50 shadow-lg">
             <CardHeader>
               <CardTitle>Donation Trend</CardTitle>
               <CardDescription>Your giving over the last 5 months</CardDescription>
@@ -263,6 +291,70 @@ const ImpactReport = () => {
                 </div>
               )}
             </CardContent>
+          </Card> */}
+          <Card className="border-border/50 shadow-lg">
+            <CardHeader>
+              <CardTitle>Donations by NGO</CardTitle>
+              <CardDescription>
+                How much you’ve donated to each organization
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {completedDonations.length > 0 ? (
+                <>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={Object.entries(
+                          completedDonations.reduce((acc, donation) => {
+                            const ngoName =
+                              typeof donation.ngoId === "object"
+                                ? donation.ngoId.name
+                                : "Unknown NGO";
+                            acc[ngoName] =
+                              (acc[ngoName] || 0) + donation.amount;
+                            return acc;
+                          }, {} as Record<string, number>)
+                        ).map(([ngo, amount]) => ({ ngo, amount }))}
+                      >
+                        <XAxis
+                          dataKey="ngo"
+                          stroke="hsl(var(--muted-foreground))"
+                          fontSize={12}
+                          angle={0}
+                          textAnchor="middle"
+                          height={60}
+                        />
+                        <YAxis
+                          stroke="hsl(var(--muted-foreground))"
+                          fontSize={12}
+                          tickFormatter={(val) =>
+                            `₹${(val / 1000).toFixed(0)}k`
+                          }
+                        />
+                        <Tooltip
+                          formatter={(value: number) => formatCurrency(value)}
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                          }}
+                        />
+                        <Bar
+                          dataKey="amount"
+                          fill="hsl(var(--primary))"
+                          radius={[8, 8, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  <p>No NGO donation data available</p>
+                </div>
+              )}
+            </CardContent>
           </Card>
         </div>
 
@@ -279,7 +371,9 @@ const ImpactReport = () => {
               <div className="space-y-4">
                 {impactReports.slice(0, 5).map((report, index) => {
                   const ngoName =
-                    typeof report.ngoId === 'object' ? report.ngoId.name : 'NGO';
+                    typeof report.ngoId === "object"
+                      ? report.ngoId.name
+                      : "NGO";
                   return (
                     <div
                       key={report._id}
