@@ -1,11 +1,13 @@
 ﻿import { apiClient } from "@/lib/api";
 
+export type UserRole = "donor" | "ngo" | "admin";
+
 export interface User {
   id: string;
   _id: string;
   name: string;
   email: string;
-  role: "donor" | "ngo" | "admin";
+  role: UserRole;
 }
 
 export interface LoginResponse {

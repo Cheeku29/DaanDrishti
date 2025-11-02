@@ -5,7 +5,15 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { authService, User, SignupData } from "@/services/authService";
+import {
+  authService,
+  User,
+  SignupData,
+  UserRole,
+} from "@/services/authService";
+
+// Re-export UserRole for convenience
+export type { UserRole };
 
 interface AuthContextType {
   user: User | null;
