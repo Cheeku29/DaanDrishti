@@ -1,7 +1,7 @@
-import { Link, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Heart, TrendingUp, Shield, ArrowRight } from 'lucide-react';
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Heart, TrendingUp, Shield, ArrowRight } from "lucide-react";
 
 const Index = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -33,10 +33,14 @@ const Index = () => {
           </div>
           <div className="flex gap-4">
             <Link to="/login">
-              <Button variant="outline" className="border-border/50">Sign In</Button>
+              <Button variant="outline" className="border-border/50">
+                Sign In
+              </Button>
             </Link>
             <Link to="/signup">
-              <Button className="bg-gradient-primary hover:opacity-90 shadow-glow">Get Started</Button>
+              <Button className="bg-gradient-primary hover:opacity-90 shadow-glow">
+                Get Started
+              </Button>
             </Link>
           </div>
         </nav>
@@ -51,22 +55,30 @@ const Index = () => {
                 Transparent & Trackable
               </span>
             </h1>
-            
+
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect with verified NGOs and see exactly how your donations create real impact. 
-              Complete transparency in charitable giving with real-time tracking.
+              Connect with verified NGOs and see exactly how your donations
+              create real impact. Complete transparency in charitable giving
+              with real-time tracking.
             </p>
           </div>
 
           <div className="flex gap-4 justify-center pt-4">
             <Link to="/signup">
-              <Button size="lg" className="bg-gradient-accent hover:opacity-90 text-lg px-10 py-6 shadow-glow-accent">
+              <Button
+                size="lg"
+                className="bg-gradient-accent hover:opacity-90 text-lg px-10 py-6 shadow-glow-accent"
+              >
                 Start Donating
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Link to="/ngos">
-              <Button size="lg" variant="outline" className="text-lg px-10 py-6 border-border/50">
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-10 py-6 border-border/50"
+              >
                 Explore NGOs
               </Button>
             </Link>
@@ -80,7 +92,8 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold mb-3">Verified NGOs</h3>
               <p className="text-muted-foreground leading-relaxed">
-                All NGOs are thoroughly verified to ensure your donations reach legitimate organizations
+                All NGOs are thoroughly verified to ensure your donations reach
+                legitimate organizations
               </p>
             </div>
 
@@ -90,7 +103,8 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold mb-3">Track Impact</h3>
               <p className="text-muted-foreground leading-relaxed">
-                See detailed breakdowns of how your donations are being used across different sectors
+                See detailed breakdowns of how your donations are being used
+                across different sectors
               </p>
             </div>
 
@@ -98,9 +112,12 @@ const Index = () => {
               <div className="h-14 w-14 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6 group-hover:shadow-glow transition-all">
                 <Heart className="h-7 w-7 text-success" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Complete Transparency</h3>
+              <h3 className="text-xl font-semibold mb-3">
+                Complete Transparency
+              </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Real-time updates and reports showing exactly where every dollar goes
+                Real-time updates and reports showing exactly where every dollar
+                goes
               </p>
             </div>
           </div>
