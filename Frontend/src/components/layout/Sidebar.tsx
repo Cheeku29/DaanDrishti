@@ -45,7 +45,7 @@ export const Sidebar = () => {
   const SidebarContent = () => (
     <>
       <div className="p-6 border-b border-sidebar-border">
-        <h1 className="text-2xl font-bold text-sidebar-foreground">DonateTrack</h1>
+        <h1 className="text-2xl font-bold text-sidebar-foreground">DaanDrishti</h1>
         <p className="text-sm text-sidebar-foreground/70 mt-1 capitalize">{user.role} Portal</p>
       </div>
 

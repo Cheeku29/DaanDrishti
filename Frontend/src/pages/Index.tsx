@@ -29,7 +29,7 @@ const Index = () => {
             <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow">
               <Heart className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold glow-text">DonateTrack</span>
+            <span className="text-2xl font-bold glow-text">DaanDrishti</span>
           </div>
           <div className="flex gap-4">
             <Link to="/login">
