@@ -1,4 +1,4 @@
-# 🌟 DonateTrack - Transparent NGO Donation Platform
+# 🌟 DaanDrishti - Transparent NGO Donation Platform
 
 A comprehensive full-stack web application that connects donors with verified NGOs, ensuring complete transparency in charitable giving and donation tracking.
 
